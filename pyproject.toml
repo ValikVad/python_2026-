@@ -1,0 +1,64 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "python-course-2026"
+version = "0.1.0"
+description = "Python-курс: пакетные менеджеры uv/poetry, линтеры, pre-commit и практика."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "requests>=2.31.0",     # HTTP-клиент
+    "pydantic>=2.7.0",      # валидация данных / модели
+    "python-dotenv>=1.0.0", # чтение .env
+    "rich>=13.7.0",         # красивые выводы в терминале
+]
+
+# Группа «только для разработки» — линтеры и тесты. В проде это НЕ ставится.
+[dependency-groups]
+dev = [
+    "ruff>=0.5.0",        # линтер + форматтер
+    "pytest>=8.0.0",      # тесты
+    "mypy>=1.10.0",       # статическая типизация
+    "pre-commit>=3.7.0",  # хуки перед коммитом
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["obsidian/homework/01_типы_и_циклы"]
+
+[tool.uv]
+package = false  # не публикуем пакет, просто рабочее окружение курса
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["obsidian/homework"]
+extend-exclude = ["obsidian/homework/06_тетрис_ооп/студенту"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "S"]
+ignore = ["S101", "S311"]  # разрешаем assert в тестах; random — учебный, не криптография
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+exclude = ["tests", "obsidian/homework/06_тетрис_ооп/студенту"]
+
+[tool.pytest.ini_options]
+testpaths = ["obsidian/homework"]
+addopts = "-q --ignore=obsidian/homework/06_тетрис_ооп/студенту"
+pythonpath = [
+    "obsidian/homework",
+    "obsidian/homework/01_типы_и_циклы",
+    "obsidian/homework/02_строки_и_методы",
+    "obsidian/homework/03_функции_и_области_видимости",
+    "obsidian/homework/04_классы_и_ООП",
+    "obsidian/homework/05_игра_жизнь",
+    "obsidian/homework/06_тетрис_ооп/решение",
+]

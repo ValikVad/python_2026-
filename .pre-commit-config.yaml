@@ -1,0 +1,41 @@
+# Pre-commit: запускается автоматически перед каждым git commit.
+# Установка:  pip install pre-commit && pre-commit install
+#
+# Логика «без дублирования»:
+#   • ruff           — линт + формат (заменяет black/isort/flake8, всё в одном)
+#   • mypy           — только статическая типизация
+#   • pre-commit-hooks — гигиена файлов (не про Python-код)
+repos:
+  # --- Гигиена файлов репозитория (не линтеры кода) ---
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: check-added-large-files
+      - id: requirements-txt-fixer
+
+  # --- Линт + формат (black/isort/flake8 теперь не нужны отдельно) ---
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.5.5
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+  # --- Типизация (strict). Берём mypy из dev-окружения, отдельный env не нужен ---
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: mypy
+        language: system
+        types: [python]
+        require_serial: true
+        pass_filenames: false
+        args: ["obsidian/homework"]
