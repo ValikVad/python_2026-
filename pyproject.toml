@@ -25,7 +25,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["obsidian/homework/01_типы_и_циклы"]
+packages = ["practice/homework/01_type_for_and_while"]
 
 [tool.uv]
 package = false  # не публикуем пакет, просто рабочее окружение курса
@@ -33,8 +33,8 @@ package = false  # не публикуем пакет, просто рабоче
 [tool.ruff]
 line-length = 100
 target-version = "py310"
-src = ["obsidian/homework"]
-extend-exclude = ["obsidian/homework/06_тетрис_ооп/студенту"]
+src = ["practice/homework"]
+extend-exclude = ["practice/homework/06_tetris_oop/student"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "S"]
@@ -48,17 +48,15 @@ line-ending = "lf"
 [tool.mypy]
 python_version = "3.10"
 strict = true
-exclude = ["tests", "obsidian/homework/06_тетрис_ооп/студенту"]
+exclude = ["tests", "practice/homework/06_tetris_oop/student"]
 
 [tool.pytest.ini_options]
-testpaths = ["obsidian/homework"]
-addopts = "-q --ignore=obsidian/homework/06_тетрис_ооп/студенту"
+testpaths = ["practice/homework"]
+addopts = "-q --ignore=practice/homework/06_tetris_oop/student"
 pythonpath = [
-    "obsidian/homework",
-    "obsidian/homework/01_типы_и_циклы",
-    "obsidian/homework/02_строки_и_методы",
-    "obsidian/homework/03_функции_и_области_видимости",
-    "obsidian/homework/04_классы_и_ООП",
-    "obsidian/homework/05_игра_жизнь",
-    "obsidian/homework/06_тетрис_ооп/решение",
+    "practice/homework",
+    "practice/homework/01_type_for_and_while",
+    "practice/homework/03_function",
+    "practice/homework/04_class",
+    "practice/homework/06_tetris_oop/solution",
 ]

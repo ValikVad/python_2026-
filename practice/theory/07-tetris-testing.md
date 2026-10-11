@@ -1,0 +1,186 @@
+# Занятие · Юнит- и функциональное тестирование на примере Тетриса
+
+> Живой код: `practice/homework/06_tetris_oop/solution/` (`figures.py`, `tetris.py`, `tests/`).
+> Открывай тесты рядом — это лучше, чем читать теорию в отрыве.
+
+---
+
+## 1. Зачем вообще тесты
+
+Приложение растёт, и ручная проверка перестаёт успевать. Тесты **автоматизируют** ответ
+на вопрос «работает ли код после изменения». В Тетрисе это особенно важно: логика
+поворота, коллизий и удаления рядов легко сломать, не заметив.
+
+**Термины:**
+- **Юнит-тест** (unit) — проверяет ОДНУ маленькую единицу: функцию или метод,
+  изолированно, «в вакууме».
+- **Функциональный тест** — проверяет систему/класс целиком: «сценарий работы».
+
+В нашем Тетрисе:
+| Уровень | Что проверяем |
+|---|---|
+| Юнит | `rotated()`, `cells`, `collides()`, `clear_rows()` — по отдельности |
+| Функциональный | `Tetris` целиком: спавн, падение, поворот, укладка, счёт |
+
+---
+
+## 2. Юнит-тесты: маленькие изолированные проверки
+
+Открой `tests/test_figures.py`. Это чистые unit-тесты фигур — они проверяют
+**одну функцию** без игры:
+
+```python
+def test_neighbors_exact_set() -> None:  # в 05_игре_жизнь
+    assert neighbors((0, 0)) == {...}
+```
+
+Для фигур ключевые юнит-кейсы:
+
+```python
+def test_figureT_has_4_cells() -> None:
+    assert len(FigureT().cells) == 4
+
+
+def test_figureO_rotation_is_same() -> None:
+    o = FigureO()
+    assert o.rotated() == o  # квадрат симметричен — поворот не меняет
+
+
+def test_figureI_changes_on_rotation() -> None:
+    assert FigureI().rotated() != FigureI()
+```
+
+**Почему это юнит:** тестируется метод `rotated()` и `cells` — изолированно, без поля,
+без игры, без ввода. Быстро, детерминированно, легко локализовать поломку.
+
+### Правила юнит-теста
+1. Тестирует **один** метод/функцию.
+2. Не зависит от внешнего состояния (сети, времени, случайности).
+3. Понятно, что именно упало (`assert FigureT().cells == [...]` лучше, чем «не падай»).
+
+---
+
+## 3. Функциональные тесты: сценарии целиком
+
+Открой `tests/test_tetris.py` — это функциональные тесты класса `Board` и целой игры:
+
+### Коллизии — проверка сценария «фигура не должна влезть»
+
+```python
+def test_collision_with_left_wall() -> None:
+    board = Board()
+    assert board.collides(FigureO(), -1, 0)  # за левый край нельзя
+
+
+def test_collision_with_bottom() -> None:
+    board = Board()
+    assert board.collides(FigureO(), 0, 19)  # упёрлась в низ
+```
+
+### Полный сценарий «уложили фигуру и она видна»
+
+```python
+def test_lock_persists() -> None:
+    board = Board()
+    board.lock(FigureO(), 0, 18)
+    assert board.grid[18][0] is not None
+    assert board.grid[19][1] is not None
+```
+
+### Интеграция на уровне `Tetris`
+
+```python
+def test_rotate_keeps_same_type() -> None:
+    game = Tetris()
+    before = type(game.current)
+    game.rotate()
+    assert isinstance(game.current, before)  # поворот не меняет тип фигуры
+```
+
+**Почему это функциональные:** проверяется связка поле+фигура (и даже вся игра),
+поведение *взаимодействия*, а не одиночный метод.
+
+---
+
+## 4. Arrange–Act–Assert (AAA)
+
+Любой тест строится по схеме:
+
+```python
+def test_clear_rows_counts():
+    # Arrange — готовим данные
+    board = Board()
+    for x in range(10):
+        board.grid[19][x] = "O"
+
+    # Act — выполняем действие
+    result = board.clear_rows()
+
+    # Assert — проверяем результат
+    assert result == 1
+    assert all(c is None for c in board.grid[19])
+```
+
+Это универсальный скелет — привыкай видеть его во всех трёх блоках.
+
+---
+
+## 5. Параметризация — один тест на много случаев
+
+Когда логика повторяется, не дублируй функцию — используй `@pytest.mark.parametrize`:
+
+```python
+import pytest
+
+
+@pytest.mark.parametrize("shape_cls", [FigureI, FigureO, FigureT, ...])
+def test_all_figures_have_color_and_symbol(shape_cls):
+    assert shape_cls.COLOR != "?"
+    assert shape_cls.SYMBOL != "?"
+```
+
+pytest сам прогонит тест для каждого класса из списка — один тест, семь проверок.
+
+---
+
+## 6. Тесты и ООП: почему это красиво
+
+Тесты Тетриса демонстрируют пользу полиморфизма: `test_collides(FigureO())`,
+`test_collides(FigureI())` пишутся одинаково, потому что `Board` использует
+**общий интерфейс** `figure.cells` / `figure.SYMBOL`. Если бы для каждой фигуры
+был свой код — пришлось бы тестировать каждую отдельно.
+
+**Вывод:** хорошая архитектура (ООП) делает тесты проще. Хорошие тесты — закрепляют
+архитектуру.
+
+---
+
+## 7. Как запускать
+
+```bash
+# все тесты курса
+uv run pytest
+
+# только урок 06 (решение)
+uv run pytest practice/homework/06_tetris_oop/solution
+
+# только один файл
+uv run pytest practice/homework/06_tetris_oop/solution/tests/test_figures.py
+
+# только один тест
+uv run pytest .../test_figures.py::test_figureO_rotation_is_same
+```
+
+CI уже прогоняет всё это на каждый push (`.github/workflows/ci.yml`).
+
+---
+
+## 8. Задания на закрепление
+
+1. Добавь юнит-тест: «`FigureZ().rotated()` ≠ `FigureZ()`» (Z не симметрична).
+2. Добавь параметризованный тест: «у всех фигур ровно 4 занятые клетки».
+3. Напиши функциональный тест: уложить `FigureI` вертикально и проверить,
+   что после `clear_rows()` она осталась.
+4. (Сложнее) Протестируй `hard_move_down()`: фигура должна «упасть» до низу, не
+   пересекая границы.
+5. Ответь: тест `test_move_down_returns_bool` — юнит или функциональный? Почему?

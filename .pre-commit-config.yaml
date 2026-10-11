@@ -38,4 +38,4 @@ repos:
         types: [python]
         require_serial: true
         pass_filenames: false
-        args: ["obsidian/homework"]
+        args: ["practice/homework"]

@@ -23,12 +23,12 @@ htmlcov/
 Thumbs.db
 
 # --- Obsidian-заметки (метаданные приложения) ---
-python2026/.obsidian/
+practice/.obsidian/
 
 # --- Разное ---
 .env
 *.local
 
 # --- Персональные заметки преподавателя (в GitHub НЕ пушим) ---
-obsidian/Оценки*.md
-obsidian/заметки/_личное/
+practice/marks/grades.md
+practice/notes/_personal/
